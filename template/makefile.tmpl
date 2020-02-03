@@ -25,7 +25,7 @@ gitcommtool:
 	@cnpm init --yes
 	@commitizen init cz-conventional-changelog --save --save-exact
 gitlog:
-	@conventional-changelog -p angular -i CHANGELOG.md -s
+	@conventional-changelog -p angular -i ./doc/CHANGELOG.md -s
 install: build
 	@mv ./dist/server $(GOPATH)/dist/
 
