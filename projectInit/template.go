@@ -398,13 +398,16 @@ var (
 	GoVersion string
 )
 func main(){
+	cmd.GoVersion = GoVersion
+	cmd.BuildTime = BuildTime
+	cmd.Version = Version
 	go func() {
 		http.ListenAndServe("0.0.0.0:6060", nil)
 	}()
 	go func() {
 		log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(http.DefaultServeMux)))
 	}()
-	cmd.Execute(Version,BuildTime,GoVersion)
+	cmd.Execute()
 }
 `
 
@@ -448,10 +451,7 @@ import (
 
 var RootCmd = BaseCommand("serviceName", "服务描述")
 
-func Execute(version,buildTime,goVersion string) {
-    Version = version
-	BuildTime = buildTime
-	GoVersion = goVersion
+func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(-1)

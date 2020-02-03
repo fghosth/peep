@@ -21,7 +21,7 @@ confile:
 	@mkdir -p ./dist/conf
 	#@cp ./conf/config.yaml ./dist/conf
 statik:
-	@rm -rf statik && statik -f -src=template
+	@rm -rf ./statik && statik -f -src=template
 gitcommtool:
 	@brew install node
 	@npm install -g cnpm --registry=https://registry.npm.taobao.org

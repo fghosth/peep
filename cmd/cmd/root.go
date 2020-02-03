@@ -8,10 +8,7 @@ import (
 
 var RootCmd = BaseCommand("peep", "根据数据库生成代码")
 
-func Execute(version,buildTime,goVersion string) {
-	Version = version
-	BuildTime = buildTime
-	GoVersion = goVersion
+func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(-1)

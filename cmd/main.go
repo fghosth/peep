@@ -10,5 +10,8 @@ var (
 )
 
 func main() {
-	cmd.Execute(Version,BuildTime,GoVersion)
+	cmd.GoVersion = GoVersion
+	cmd.BuildTime = BuildTime
+	cmd.Version = Version
+	cmd.Execute()
 }
