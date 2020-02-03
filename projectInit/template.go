@@ -271,7 +271,6 @@ RedisDB: 0
 
 import (
 	"github.com/fsnotify/fsnotify"
-	"github.com/k0kubun/pp"
 	"github.com/spf13/viper"
 	"{{{module}}}/infra/util"
 	"go.uber.org/zap"
@@ -349,7 +348,7 @@ func (cfg Config) InitConfig(file string) {
 	Viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Println("配置文件变更，重新生效")
 		cfg.load(file)
-		pp.Println(CFG)
+		log.Println(CFG)
 	})
 }
 
@@ -390,7 +389,7 @@ import (
 	_ "github.com/mkevac/debugcharts"
 	"log"
 	"net/http"
-	_ "net/http/pprof"
+	//_ "net/http/pprof"
 )
 var (
 	Version   string
@@ -402,7 +401,10 @@ func main(){
 	cmd.BuildTime = BuildTime
 	cmd.Version = Version
 	go func() {
-		http.ListenAndServe("0.0.0.0:6060", nil)
+		err := http.ListenAndServe("0.0.0.0:6060", nil)
+		if err != nil {
+			log.Println(err)
+		}
 	}()
 	go func() {
 		log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(http.DefaultServeMux)))
@@ -721,7 +723,7 @@ func NewClientTrace(address,serverName string,opt ...OpenTraceOption)(*ClientTra
 }
 
 
-func (this ClientTrace)clientDialOption(tracer opentracing.Tracer) grpc.DialOption {
+func (this ClientTrace)ClientDialOption() grpc.DialOption {
 	return grpc.WithUnaryInterceptor(this.JaegerGrpcClientInterceptor)
 }
 type TextMapWriter struct {

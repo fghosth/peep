@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/fghosth/peep/projectInit"
+	"os/exec"
 )
 
 var (
@@ -35,6 +37,14 @@ var createProjectCmd = &cobra.Command{
 		projectInit.CreateGithookPreCommit(projectPath+"/.githooks")
 		projectInit.CreateGolangCi(projectPath+"/.githooks")
 		projectInit.CreateCommitMsg(projectPath+"/.githooks")
+
+		gocmd := exec.Command("gofmt", "-w","-s",projectPath)
+
+		err := gocmd.Run()
+		if err != nil {
+			fmt.Println("Execute Command failed:" + err.Error())
+			return
+		}
 	},
 }
 

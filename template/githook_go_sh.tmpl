@@ -3,15 +3,11 @@ Precent=80.0
 
 #检查质量
 function checkQ(){
-   for FILE in `git diff --diff-filter=ACMTX --name-only --cached | grep -v '^vendor'`; do
-	if [[ $FILE == *.go ]]; then
 	   #echo "golangci-lint run --disable=typecheck $FILE -c ./.githooks/.golangci.yml"
-	   golangci-lint run --disable=typecheck $FILE -c ./.githooks/.golangci.yml
+	   golangci-lint run --disable=typecheck $@ -c ./.githooks/.golangci.yml
 	   if [[ $? != 0 ]]; then
               exit 1
            fi
-	fi
-   done 
 }
 
 #检查特定单词
@@ -50,6 +46,6 @@ function checkTest(){
   done
 }
 
-checkTest "./application/..." "./infra/..." "./domain/..." "./ui/..."
+checkTest "./application/..." "./infra/..." "./domain/..." "./ui/..." "./context/..."
 checkWord
-checkQ
+checkQ "./application/..." "./infra/..." "./domain/..." "./ui/..." "./cmd/..." "./conf/..." "./context/..."
