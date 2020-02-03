@@ -380,6 +380,9 @@ demo
 .DS_Store
 reports.log
 *.pdf
+node_modules
+package.json
+package-lock.json
 `
 	CMD_MAIN_TMP = `package main
 
