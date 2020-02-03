@@ -1,0 +1,36 @@
+Version := beta
+default:
+	@echo 'Usage of make: [ build | linux_build | windows_build | clean ]'
+build: confile
+	@go build -mod=vendor -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"   -o ./dist/server ./cmd
+linux_build: confile
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor  -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"  -o ./dist/server ./cmd
+windows_build: confile
+	@CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -mod=vendor -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"  -o ./dist/server.exe ./cmd
+run: build
+	@./dist/server up --conf ./dist/conf/config.yaml
+stop:
+	@kill -9 $(ps -ef | grep "./dist/server" |gawk '$0 !~/grep/ {print $2}' |tr -s '\n' ' ')
+init:
+	@git init
+	@chmod +x .githooks/go_pre_commit.sh
+	@cp .githooks/pre-commit .git/hooks && chmod +x ./.git/hooks/pre-commit && go mod tidy && go mod vendor
+	@cp .githooks/commit-msg .git/hooks && chmod +x ./.git/hooks/commit-msg
+gitcommtool:
+	@brew install node
+	@npm install -g cnpm --registry=https://registry.npm.taobao.org
+	@cnpm install -g commitizen
+	@cnpm install -g conventional-changelog
+	@cnpm install -g conventional-changelog-cli
+	@cnpm init --yes
+	@commitizen init cz-conventional-changelog --save --save-exact
+gitlog:
+	@conventional-changelog -p angular -i CHANGELOG.md -s
+install: build
+	@mv ./dist/server $(GOPATH)/dist/
+
+clean:
+	@rm -rf ./dist
+confile:
+	@mkdir -p ./dist/conf
+	@cp ./conf/config.yaml ./dist/conf
