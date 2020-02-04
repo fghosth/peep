@@ -42,6 +42,18 @@ peep mcreate --mp /Users/derek/project/demo/gomybatis/model --mpn "gomybatis/mod
 ```
 
 >【mp】生成的文件目录；【mpn】生成的文件包名；【rui】mysql的连接；【xp】生成xml目录 
+
+## 项目版本号
+在build时指定版本号
+```
+1. make build Version=v1.0.0
+2. docker build --build-arg version=v1.0.2 -t XXXXX .
+```
+获取版本,输出程序版本号，go编译版本信息，编译时间
+```bazaar
+server version
+```
+
 ## 代码质量检查
 请安装ide的代码检查插件，githook使用的是golangci-lint。
 支持的IDE：
@@ -51,7 +63,7 @@ peep mcreate --mp /Users/derek/project/demo/gomybatis/model --mpn "gomybatis/mod
 * GNU Emacs
 * VIM
 * Atom
-## git comiit规范辅助程序 安装试用
+## git comiit规范辅助程序 安装使用
 注释向导，生成符合标准的规范注释
 * 安装 
 ```
