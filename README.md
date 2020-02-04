@@ -42,8 +42,29 @@ peep mcreate --mp /Users/derek/project/demo/gomybatis/model --mpn "gomybatis/mod
 ```
 
 >【mp】生成的文件目录；【mpn】生成的文件包名；【rui】mysql的连接；【xp】生成xml目录 
-
-
+## 代码质量检查
+请安装ide的代码检查插件，githook使用的是golangci-lint。
+支持的IDE：
+* Go for Visual Studio Code
+* Sublime
+* GoLand
+* GNU Emacs
+* VIM
+* Atom
+## git comiit规范辅助程序 安装试用
+注释向导，生成符合标准的规范注释
+* 安装 
+```
+make gitcommtool
+```
+* 使用
+```
+git cz -a
+```
+* 根据注释生成changelog.md
+```bazaar
+make gitlog
+```
 ## git commit 规范
 ### 格式
 ```
@@ -65,3 +86,6 @@ type(scope) : subject
 
 ### scope（可选） : 用于说明 commit 影响的范围，比如数据层、控制层、视图层等等，视项目不同而不同。
 ### subject（必须） : commit 的简短描述，不超过50个字符。
+
+* [gitflow流程说明](./docs/gitflow.md)
+* [golangci 代码质量检查](https://github.com/golangci/golangci-lint)

@@ -383,6 +383,7 @@ reports.log
 node_modules
 package.json
 package-lock.json
+cover.out
 `
 	CMD_MAIN_TMP = `package main
 
