@@ -3,6 +3,8 @@ default:
 	@echo 'Usage of make: [ build | linux_build | windows_build | clean ]'
 build: statik
 	@go build -mod=vendor -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'" -o ./dist/peep ./cmd
+	tar czvf peep.tar.gz -C ./dist .
+	shasum -a 256 peep.tar.gz
 linux_build: confile
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor  -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"  -o ./dist/peep ./cmd
 windows_build: confile
