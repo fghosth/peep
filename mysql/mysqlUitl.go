@@ -70,9 +70,14 @@ func CreateModel(modelPath, basePackageName, modelFile, mysqluri string) []strin
 	return t2s.StructList
 }
 
-func CreateBaseFile(modelPath, baseName string) error {
+func CreateBaseFile(modelPath, baseName ,xmlPath string) error {
+	ctx := map[string]interface{}{
+		"xmlpath":     xmlPath,
+	}
+
+	createXmlStr, err := raymond.Render(BASE_TMP, ctx)
 	//生成base.go
-	err := util.WriteWithIoutil(modelPath+BaseName+baseName, BASE_TMP)
+	err = util.WriteWithIoutil(modelPath+BaseName+baseName, createXmlStr)
 	if err != nil {
 		return err
 	}
@@ -106,7 +111,7 @@ func CreateDao(pName, path string, sl []string, template, xmlPath string) error 
 	for _, v := range sl {
 		daoName := v + "Dao.go"
 		structName := v + "Mapper"
-		xmlpath := xmlPath + "/" + structName + ".xml"
+		xmlFile :=  structName + ".xml"
 		tmp := strings.Split(pName, "/")
 		packageName := tmp[len(tmp)-1]
 		sname, _ := util.FUPer(structName)
@@ -114,7 +119,8 @@ func CreateDao(pName, path string, sl []string, template, xmlPath string) error 
 			"pName":           packageName, //dao 包名
 			"basePackageName": pName,       //要引入的完整路径包名
 			"structName":      structName,
-			"xmlPath":         xmlpath,
+			"TableStruct": v,
+			"xmlFile":         xmlFile,
 			"sName":           sname,
 		}
 

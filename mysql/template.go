@@ -24,11 +24,27 @@ func TestBybatis(t *testing.T){
  		{{{this}}}
     {{/each}}
 	for k, v := range beans {
-		xmlfile:=xmlPath+reflect.TypeOf(v).Name()+"Mapper.xml"
+		xmlfile:=xmlPath+"/"+reflect.TypeOf(v).Name()+"Mapper.xml"
+		if isexist, _ := PathExists(xmlfile); isexist {
+			log.Println(xmlfile + "已存在，跳过")
+			continue
+		}
 		xml:=GoMybatis.CreateXml(k, v)
 		xml = bytes.Replace(xml,[]byte("</mapper>"),[]byte(XML_TMP),-1)
  		GoMybatis.OutPutXml(xmlfile, xml)
 	}
+}
+
+//判断文件或目录是否存在
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }
 
 const (
@@ -50,8 +66,7 @@ XML_TMP=` + "`" + `
 </mapper>
 ` + "`)"
 
-	DAO_TMP = `
-package {{{pName}}}
+	DAO_TMP = `package {{{pName}}}
 import (
 	"{{{basePackageName}}}/base"
 	"github.com/zhuxiujia/GoMybatis"
@@ -65,10 +80,10 @@ type {{{structName}}} struct {
 	GoMybatis.SessionSupport                                   //session事务操作 写法1.  ExampleActivityMapper.SessionSupport.NewSession()
 	NewSession               func() (GoMybatis.Session, error) //session事务操作.写法2   ExampleActivityMapper.NewSession()
 	//模板示例
-	FindByID      func(id int) ([]base.CountTask, error) ` + "`" + `mapperParams:"id"` + "`" + `
-	Insert      func(arg base.CountTask) (int64, error) ` + "`" + `mapperParams:"arg"` + "`" + `
-	InsertBatch func(args []base.CountTask) (int64, error) ` + "`" + `mapperParams:"args"` + "`" + `
-	UpdataByID      func(arg base.CountTask) (int64, error)    ` + "`" + `mapperParams:"id"` + "`" + `
+	FindByID      func(id int) ([]base.{{{TableStruct}}}, error) ` + "`" + `mapperParams:"id"` + "`" + `
+	Insert      func(arg base.{{{TableStruct}}}) (int64, error) ` + "`" + `mapperParams:"arg"` + "`" + `
+	InsertBatch func(args []base.{{{TableStruct}}}) (int64, error) ` + "`" + `mapperParams:"args"` + "`" + `
+	UpdataByID      func(arg base.{{{TableStruct}}}) (int64, error)    ` + "`" + `mapperParams:"id"` + "`" + `
 	DeleteByID      func(id int) (int64, error)     ` + "`" + `mapperParams:"id"` + "`" + `
 }
 var (
@@ -84,7 +99,7 @@ func New{{{structName}}}()(*{{{structName}}},error){
 		if err!=nil {
 			return
 		}
-		err=db.WriteMapper({{{sName}}},"{{{xmlPath}}}")
+		err=db.WriteMapper({{{sName}}},base.Xmlpath+"/{{{xmlFile}}}")
 		if err!=nil {
 			return
 		}
@@ -95,8 +110,7 @@ func New{{{structName}}}()(*{{{structName}}},error){
 	return {{{sName}}},nil
 }
 `
-	BASE_TMP = `
-package base
+	BASE_TMP = `package base
 
 import (
 	"database/sql"
@@ -112,6 +126,7 @@ var (
 	dbBase *DBBase
 	defaultMaxIdleConns = 10
 	defaultMaxOpenConns = 50
+	Xmlpath = "{{{xmlpath}}}/"
 )
 
 type DBBase struct{
@@ -149,7 +164,7 @@ func NewDBBase(mysqlUri string, opt ...func(option *Option))(*DBBase,error) {
 			MaxIdleConns: defaultMaxIdleConns,
 			MaxOpenConns: defaultMaxOpenConns,
 			SetLogEnable: false,
-			LogFun: func(msg []byte) {},
+			LogFun: nil,
 		}
 		for _, f := range opt {
 			f(&option)
@@ -167,12 +182,14 @@ func NewDBBase(mysqlUri string, opt ...func(option *Option))(*DBBase,error) {
 		dbBase.db.SetMaxIdleConns(dbBase.opt.MaxIdleConns)
 		dbBase.db.SetMaxOpenConns(dbBase.opt.MaxOpenConns)
 		//自定义日志实现
-		dbBase.engine.SetLogEnable(dbBase.opt.SetLogEnable)
-		dbBase.engine.SetLog(&GoMybatis.LogStandard{
-			PrintlnFunc: func(messages []byte) {
-				dbBase.opt.LogFun(messages)
-			},
-		})
+		if dbBase.opt.LogFun != nil {
+			dbBase.engine.SetLogEnable(dbBase.opt.SetLogEnable)
+			dbBase.engine.SetLog(&GoMybatis.LogStandard{
+				PrintlnFunc: func(messages []byte) {
+					dbBase.opt.LogFun(messages)
+				},
+			})
+		}
 	})
 	if err != nil {
 		return nil,err

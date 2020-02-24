@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/fghosth/peep/mysql"
 	"log"
+	"os/exec"
 )
 
 var createByMysqlCmd = &cobra.Command{
@@ -18,9 +20,17 @@ var createByMysqlCmd = &cobra.Command{
 			log.Println("生成DAO错误" + err.Error())
 		}
 		mysql.CreateXmlGoFile(sl, mysql.BasePackageName, mysql.XmlPath, mysql.ModelPath, mysql.MybatisFile)
-		err = mysql.CreateBaseFile(mysql.ModelPath, mysql.BaseFileName)
+		err = mysql.CreateBaseFile(mysql.ModelPath, mysql.BaseFileName,mysql.XmlPath)
 		if err != nil {
 			log.Println("生成base.go错误" + err.Error())
+		}
+		gocmd := exec.Command("gofmt", "-w","-s",mysql.ModelPath)
+		err = gocmd.Run()
+		//gocmd = exec.Command("gofmt", "-w","-s",mysql.ModelPath+"/base")
+		//err = gocmd.Run()
+		if err != nil {
+			fmt.Println("Execute Command failed:" + err.Error())
+			return
 		}
 	},
 }
