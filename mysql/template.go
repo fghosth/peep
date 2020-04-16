@@ -80,11 +80,11 @@ type {{{structName}}} struct {
 	GoMybatis.SessionSupport                                   //session事务操作 写法1.  ExampleActivityMapper.SessionSupport.NewSession()
 	NewSession               func() (GoMybatis.Session, error) //session事务操作.写法2   ExampleActivityMapper.NewSession()
 	//模板示例
-	FindByID      func(id int) ([]base.{{{TableStruct}}}, error) ` + "`" + `mapperParams:"id"` + "`" + `
-	Insert      func(arg base.{{{TableStruct}}}) (int64, error) ` + "`" + `mapperParams:"arg"` + "`" + `
-	InsertBatch func(args []base.{{{TableStruct}}}) (int64, error) ` + "`" + `mapperParams:"args"` + "`" + `
-	UpdataByID      func(arg base.{{{TableStruct}}}) (int64, error)    ` + "`" + `mapperParams:"id"` + "`" + `
-	DeleteByID      func(id int) (int64, error)     ` + "`" + `mapperParams:"id"` + "`" + `
+	FindByID      func(id int) ([]base.{{{TableStruct}}}, error) ` + "`" + `args:"id"` + "`" + `
+	Insert      func(arg base.{{{TableStruct}}}) (int64, error) ` + "`" + `args:"arg"` + "`" + `
+	InsertBatch func(args []base.{{{TableStruct}}}) (int64, error) ` + "`" + `args:"args"` + "`" + `
+	UpdataByID      func(arg base.{{{TableStruct}}}) (int64, error)    ` + "`" + `args:"id"` + "`" + `
+	DeleteByID      func(id int) (int64, error)     ` + "`" + `args:"id"` + "`" + `
 }
 var (
 	{{{sName}}}Once sync.Once
