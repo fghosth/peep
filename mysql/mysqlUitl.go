@@ -3,9 +3,9 @@ package mysql
 import (
 	"fmt"
 	"github.com/aymerick/raymond"
-	"github.com/k0kubun/pp"
 	"github.com/fghosth/peep/converter"
 	"github.com/fghosth/peep/util"
+	"github.com/k0kubun/pp"
 	"log"
 	"os"
 	"strings"
@@ -59,6 +59,7 @@ func CreateModel(modelPath, basePackageName, modelFile, mysqluri string) []strin
 		PackageName(basePackageName).
 		// tag字段的key值,默认是orm
 		//TagKey("orm").
+		TagKey("gm").
 		// 是否添加结构体方法获取表名
 		RealNameMethod("TableName").
 		// 生成的结构体保存路径
@@ -70,9 +71,9 @@ func CreateModel(modelPath, basePackageName, modelFile, mysqluri string) []strin
 	return t2s.StructList
 }
 
-func CreateBaseFile(modelPath, baseName ,xmlPath string) error {
+func CreateBaseFile(modelPath, baseName, xmlPath string) error {
 	ctx := map[string]interface{}{
-		"xmlpath":     xmlPath,
+		"xmlpath": xmlPath,
 	}
 
 	createXmlStr, err := raymond.Render(BASE_TMP, ctx)
@@ -111,7 +112,7 @@ func CreateDao(pName, path string, sl []string, template, xmlPath string) error 
 	for _, v := range sl {
 		daoName := v + "Dao.go"
 		structName := v + "Mapper"
-		xmlFile :=  structName + ".xml"
+		xmlFile := structName + ".xml"
 		tmp := strings.Split(pName, "/")
 		packageName := tmp[len(tmp)-1]
 		sname, _ := util.FUPer(structName)
@@ -119,7 +120,7 @@ func CreateDao(pName, path string, sl []string, template, xmlPath string) error 
 			"pName":           packageName, //dao 包名
 			"basePackageName": pName,       //要引入的完整路径包名
 			"structName":      structName,
-			"TableStruct": v,
+			"TableStruct":     v,
 			"xmlFile":         xmlFile,
 			"sName":           sname,
 		}
