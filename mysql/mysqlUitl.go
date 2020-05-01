@@ -59,7 +59,7 @@ func CreateModel(modelPath, basePackageName, modelFile, mysqluri string) []strin
 		PackageName(basePackageName).
 		// tag字段的key值,默认是orm
 		//TagKey("orm").
-		TagKey("gm").
+		//TagKey("gm").
 		// 是否添加结构体方法获取表名
 		RealNameMethod("TableName").
 		// 生成的结构体保存路径

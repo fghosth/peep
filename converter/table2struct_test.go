@@ -13,10 +13,10 @@ import (
 
 var (
 	modelFile       = "model.go"
-	modelPath       = "/Users/derek/project/demo/gomybatis/model/base/"
+	modelPath       = "/Users/derek/project/peep/dist/mysql"
 	basePackageName = "base"
 	daoPackageName  = "model"
-	dsn             = "root:zaqwedcxs@tcp(localhost:3306)/hex_reports?charset=utf8mb4&parseTime=true"
+	dsn             = "lelecha:yzEVlBndaMmkbzz7@tcp(rm-uf6xuw7c9aqu09c26so.mysql.rds.aliyuncs.com:3306)/lelecha_dev_boh_costengin?charset=utf8mb4&parseTime=true"
 	mybatisFile     = "createXml_test.go"
 	baseName        = "base.go"
 	xmlPath         = "/Users/derek/project/demo/peep/mysqlxml/"
@@ -394,3 +394,9 @@ func WithLogFun(f func(msg []byte)) DBOption {
 
 `
 )
+
+func Test_removeBrackets(t *testing.T) {
+	s := "bigint(23) unsigned"
+	res := removeBrackets(s)
+	log.Println(res)
+}

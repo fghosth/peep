@@ -119,6 +119,7 @@ import (
 	"github.com/zhuxiujia/GoMybatis"
 	"io/ioutil"
 	"sync"
+	"time"
 )
 
 var (
@@ -126,6 +127,7 @@ var (
 	dbBase *DBBase
 	defaultMaxIdleConns = 10
 	defaultMaxOpenConns = 50
+	defaultConnMaxLifetime = 60
 	Xmlpath = "{{{xmlpath}}}/"
 )
 
@@ -139,6 +141,7 @@ type DBBase struct{
 type Option struct{
 	MaxIdleConns int
 	MaxOpenConns int
+	ConnMaxLifetime int
 	SetLogEnable bool //是否自定义日志系统
 	LogFun func(msg []byte)//自定义日志
 }
@@ -163,6 +166,7 @@ func NewDBBase(mysqlUri string, opt ...func(option *Option))(*DBBase,error) {
 		option:=Option{
 			MaxIdleConns: defaultMaxIdleConns,
 			MaxOpenConns: defaultMaxOpenConns,
+			ConnMaxLifetime: defaultConnMaxLifetime,
 			SetLogEnable: false,
 			LogFun: nil,
 		}
@@ -181,6 +185,7 @@ func NewDBBase(mysqlUri string, opt ...func(option *Option))(*DBBase,error) {
 		}
 		dbBase.db.SetMaxIdleConns(dbBase.opt.MaxIdleConns)
 		dbBase.db.SetMaxOpenConns(dbBase.opt.MaxOpenConns)
+		dbBase.db.SetConnMaxLifetime(time.Duration(dbBase.opt.ConnMaxLifetime) * time.Second)
 		//自定义日志实现
 		if dbBase.opt.LogFun != nil {
 			dbBase.engine.SetLogEnable(dbBase.opt.SetLogEnable)

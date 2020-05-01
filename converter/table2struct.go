@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -273,7 +274,8 @@ func (t *Table2Struct) getColumns(table ...string) (tableColumns map[string][]co
 	}
 	tableColumns = make(map[string][]column)
 	// sql
-	var sqlStr = `SELECT COLUMN_NAME,DATA_TYPE,IS_NULLABLE,TABLE_NAME,COLUMN_COMMENT
+	//var sqlStr = `SELECT COLUMN_NAME,DATA_TYPE,IS_NULLABLE,TABLE_NAME,COLUMN_COMMENT
+	var sqlStr = `SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE,TABLE_NAME,COLUMN_COMMENT
 		FROM information_schema.COLUMNS 
 		WHERE table_schema = DATABASE()`
 	// 是否指定了具体的table
@@ -304,7 +306,7 @@ func (t *Table2Struct) getColumns(table ...string) (tableColumns map[string][]co
 		col.Tag = col.ColumnName
 		col.ColumnComment = col.ColumnComment
 		col.ColumnName = t.camelCase(col.ColumnName)
-		col.Type = typeForMysqlToGo[col.Type]
+		col.Type = typeForMysqlToGo[removeBrackets(col.Type)]
 		jsonTag := col.Tag
 		// 字段首字母本身大写, 是否需要删除tag
 		if t.config.RmTagIfUcFirsted &&
@@ -380,4 +382,13 @@ func (t *Table2Struct) camelCase(str string) string {
 }
 func tab(depth int) string {
 	return strings.Repeat("\t", depth)
+}
+
+func removeBrackets(str string) string {
+	//括号内容，包括括号
+	pat := `\([\d]+\)`
+	re, _ := regexp.Compile(pat)
+	col := re.ReplaceAllString(str, "")
+	return col
+
 }
