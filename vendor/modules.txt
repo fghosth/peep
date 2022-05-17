@@ -1,0 +1,50 @@
+# github.com/aymerick/raymond v2.0.2+incompatible
+## explicit
+github.com/aymerick/raymond
+github.com/aymerick/raymond/ast
+github.com/aymerick/raymond/lexer
+github.com/aymerick/raymond/parser
+# github.com/beevik/etree v1.1.0
+## explicit
+github.com/beevik/etree
+# github.com/go-sql-driver/mysql v1.4.1
+## explicit
+github.com/go-sql-driver/mysql
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88
+## explicit
+# github.com/k0kubun/pp v3.0.1+incompatible
+## explicit
+github.com/k0kubun/pp
+# github.com/mattn/go-colorable v0.1.4
+## explicit
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.8
+github.com/mattn/go-isatty
+# github.com/rakyll/statik v0.1.6
+## explicit
+github.com/rakyll/statik/fs
+# github.com/spf13/cobra v0.0.5
+## explicit
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# github.com/zhuxiujia/GoMybatis v6.5.8+incompatible
+## explicit
+github.com/zhuxiujia/GoMybatis
+github.com/zhuxiujia/GoMybatis/ast
+github.com/zhuxiujia/GoMybatis/engines
+github.com/zhuxiujia/GoMybatis/lib/github.com/beevik/etree
+github.com/zhuxiujia/GoMybatis/lib/github.com/google/uuid
+github.com/zhuxiujia/GoMybatis/lib/github.com/zhuxiujia/GoFastExpress
+github.com/zhuxiujia/GoMybatis/stmt
+github.com/zhuxiujia/GoMybatis/tx
+github.com/zhuxiujia/GoMybatis/utils
+# golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223
+golang.org/x/sys/unix
+# google.golang.org/appengine v1.6.5
+## explicit
+google.golang.org/appengine/cloudsql
+# gopkg.in/yaml.v2 v2.2.7
+## explicit

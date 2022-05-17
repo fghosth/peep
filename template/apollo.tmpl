@@ -1,0 +1,182 @@
+/**
+ * @Author: derek
+ * @Description:
+ * @File: apollo.go
+ * @Version: 1.0.0
+ * @Date: 2021/12/13 18:58
+ */
+
+package apollo
+
+import (
+	"github.com/shima-park/agollo"
+	"{{{module}}}/infra/apolloOpenApi"
+	"{{{module}}}/infra/filex"
+	"log"
+)
+
+var (
+	portalAddress            = "apollo-devops.fghosth.net.cn"
+	fghosth_abc_token           = "68e2e04f70e4f9dd02d134799ef8c93cc696213e" // #nosec
+	user                     = "apollo"
+	ENV_PRD                  = "PRO"
+	ENV_QA                   = "QA"
+	ENV_DEV                  = "DEV"
+	ENV_TEST                 = "TEST"
+	configPath               = "./"
+	ApolloOpenApiAddress     = "apollo-devops.fghosth.net.cn"
+	Apollo_prd_address       = "apolloconfig-prod.fghosth.cn"
+	Apollo_qa_address        = "apolloconfig-qa.fghosth.cn"
+	Apollo_dev_address       = "apolloconfig-dev.fghosth.cn"
+	Apollo_test_address      = "apolloconfig-test.fghosth.cn"
+	ApolloClusterNameDefault = "default"
+	ApolloDevopsAppToken     = "8edd9ed05d85706efa6c7b0ecd710fa7cb574045"
+	ApolloDevopsAppID        = "devops-app-20211228"
+	ApolloUser               = "apollo"
+	ApolloDatabaseMysqlNS    = "MySQL"
+	ApolloDatabasePGNS       = "PostgreSQL"
+	ApolloDatabaseRedisNS    = "redis"
+	ApolloMQRocketMQNS       = "rocketMQ"
+	ApolloMQRocketNSQNS      = "NSQ"
+)
+
+type WatchFunc func(ns string, oldVal, newVal agollo.Configurations, err error) error
+type ApolloConfig struct {
+	host  string
+	token string
+	user  string
+	debug bool
+}
+
+func SetportalAddress(addr string) {
+	portalAddress = addr
+}
+
+func Setfghosth_abc_token(token string) {
+	fghosth_abc_token = token
+}
+
+func NewApolloConfig(host, token, user string, debug bool) (apollo ApolloConfig) {
+	return ApolloConfig{host: host, token: token, user: user, debug: debug}
+}
+
+//根据某个应用 bom等 获取所有文件名和响应内容
+func (this ApolloConfig) GetConfigByNS(appid, namespace string) (res map[string]string, err error) {
+	res = make(map[string]string)
+	a, err := agollo.New(this.host, appid, agollo.Cluster("default"), agollo.AutoFetchOnCacheMiss())
+	if err != nil {
+		return
+	}
+	for k, v := range a.GetNameSpace(namespace) {
+		if v1, ok := v.(string); ok {
+			res[k] = v1
+		}
+	}
+	return
+}
+
+//创建应用
+func (this ApolloConfig) CreateNamespace(name, appID, comment string) (err error) {
+	req := apolloOpenApi.CreateNamespaceRequest{
+		Name:                  name,
+		AppID:                 appID,
+		Format:                apolloOpenApi.FormatProperties,
+		IsPublic:              false,
+		DataChangeCreatedBy:   this.user,
+		Comment:               comment,
+		AppendNamespacePrefix: false,
+	}
+	c := apolloOpenApi.NewClient(this.host, this.token, apolloOpenApi.WithDebug(this.debug))
+	_, err = c.CreateNamespace(req)
+	return
+}
+
+//创建配置
+func (this ApolloConfig) AddConfig(env, appID, clusterName, namespaceName, key, val, commnet string) (err error) {
+	req := apolloOpenApi.AddItemRequest{
+		Key:                 key,
+		Value:               val,
+		Comment:             commnet,
+		DataChangeCreatedBy: this.user,
+	}
+	c := apolloOpenApi.NewClient(this.host, this.token, apolloOpenApi.WithDebug(this.debug))
+	_, err = c.AddItem(env, appID, clusterName, namespaceName, req)
+	return
+}
+
+//编辑config
+func (this ApolloConfig) EditConfig(env, appID, clusterName, namespaceName, key, val, commnet string) (err error) {
+	req := apolloOpenApi.UpdateItemRequest{
+		Key:                      key,
+		Value:                    val,
+		Comment:                  commnet,
+		DataChangeLastModifiedBy: this.user,
+		DataChangeCreatedBy:      this.user,
+	}
+	c := apolloOpenApi.NewClient(this.host, this.token, apolloOpenApi.WithDebug(this.debug))
+	err = c.UpdateItem(env, appID, clusterName, namespaceName, req)
+	return
+}
+
+//删除config
+func (this ApolloConfig) DelelteConfig(env, appID, clusterName, namespaceName, key string) (err error) {
+	c := apolloOpenApi.NewClient(this.host, this.token, apolloOpenApi.WithDebug(this.debug))
+	err = c.DeleteItem(env, appID, clusterName, namespaceName, key, this.user)
+	return
+}
+
+//发布
+func (this ApolloConfig) PublishConfig(env, appID, clusterName, namespaceName string) (err error) {
+	req := apolloOpenApi.PublishReleaseRequest{
+		ReleaseTitle:   "openapi auto publish",
+		ReleaseComment: "",
+		ReleasedBy:     this.user,
+	}
+	c := apolloOpenApi.NewClient(this.host, this.token, apolloOpenApi.WithDebug(this.debug))
+	_, err = c.PublishRelease(env, appID, clusterName, namespaceName, req)
+	return
+}
+
+//监听config
+func (this ApolloConfig) WatchConfig(appID, namespaceName string, f WatchFunc) (err error) {
+	a, err := agollo.New(this.host, appID, agollo.Cluster("default"), agollo.AutoFetchOnCacheMiss())
+	// error handle...
+	if err != nil {
+		return
+	}
+	errorCh := a.Start() // Start后会启动goroutine监听变化，并更新agollo对象内的配置cache
+	// 或者忽略错误处理直接 a.Start()
+	var stop chan bool
+	watchCh := a.WatchNamespace(namespaceName, stop)
+
+	for {
+		select {
+		case e := <-errorCh:
+			// handle error
+			log.Println("e := <-errorCh:", e.Err)
+		case resp := <-watchCh:
+			err = f(resp.Namespace, resp.OldValue, resp.NewValue, resp.Error)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+}
+
+//写配置文件
+func writeFileByConfig(ns string, oldVal, newVal agollo.Configurations, err error) error {
+	//pp.Println(ns, oldVal, newVal, err)
+	for k, v := range newVal {
+		if oldVal[k] == v { //跳过为变动配置
+			continue
+		}
+		if v1, ok := v.(string); ok {
+			err1 := filex.WriteFileTRUNC([]byte(v1), configPath+"/"+k)
+			if err1 != nil {
+				return err1
+			}
+			log.Println(k, "发生变更,已更新的配置文件")
+		}
+	}
+	return nil
+}

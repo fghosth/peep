@@ -1,0 +1,97 @@
+package dssh
+
+import (
+	"fmt"
+	"go.uber.org/zap"
+	"golang.org/x/crypto/ssh"
+	"io"
+	"net"
+	"time"
+)
+
+// 转发
+func sForward(serverAddr string, remoteAddr string, localConn net.Conn, config *ssh.ClientConfig) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered sForward", zap.Any("painic", r))
+			time.Sleep(2*time.Second)
+			sForward(serverAddr,remoteAddr,localConn,config)
+		}else{
+		}
+	}()
+	// 设置sshClientConn
+	sshClientConn, err := ssh.Dial("tcp", serverAddr, config)
+	if err != nil {
+		fmt.Printf("ssh.Dial failed: %s", err)
+	}
+
+	// 设置Connection
+	sshConn, err := sshClientConn.Dial("tcp", remoteAddr)
+	if err != nil {
+		fmt.Printf("sshConn error: %s", err)
+		return
+	}
+	// 将localConn.Reader复制到sshConn.Writer
+	go func() {
+		_, err = io.Copy(sshConn, localConn)
+		if err != nil {
+			fmt.Printf("io.Copy failed: %v", err)
+		}
+	}()
+
+	// 将sshConn.Reader复制到localConn.Writer
+	go func() {
+		_, err = io.Copy(localConn, sshConn)
+		if err != nil {
+			fmt.Printf("io.Copy failed: %v", err)
+		}
+	}()
+}
+func Tunnel(username string, password string, serverAddr string, remoteAddr string, localAddr string,pvKey []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered Tunnel", zap.Any("painic", r))
+			time.Sleep(2*time.Second)
+			Tunnel(username,password,serverAddr,remoteAddr,localAddr,pvKey)
+		}else{
+		}
+	}()
+	var auth ssh.AuthMethod
+	if len(pvKey)>10 {
+		signer,err:=ssh.ParsePrivateKey(pvKey)
+		if err!=nil {
+			fmt.Println("ssh.ParsePrivateKey error",err)
+			return
+		}
+		auth = ssh.PublicKeys(signer)
+	}else{
+		auth = ssh.Password(password)
+	}
+	// 设置SSH配置
+	fmt.Printf("%s，服务器111：%s；远程：%s；本地：%s\n", "设置SSH配置", serverAddr, remoteAddr, localAddr)
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			auth,
+		},
+		Timeout: 30 * time.Second,
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
+		},
+	}
+
+	// 设置本地监听器
+	localListener, err := net.Listen("tcp", localAddr)
+	if err != nil {
+		fmt.Printf("net.Listen failed: %v\n", err)
+	}
+
+	for {
+		// 设置本地
+		localConn, err := localListener.Accept()
+		if err != nil {
+			fmt.Printf("localListener.Accept failed: %v\n", err)
+		}
+		go sForward(serverAddr, remoteAddr, localConn, config)
+	}
+}

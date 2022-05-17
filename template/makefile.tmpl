@@ -1,0 +1,54 @@
+Version := beta
+default:
+	@echo 'Usage of make: [ build | linux_build | windows_build | clean ]'
+build: confile
+	@go build -mod=vendor -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"   -o ./dist/server ./cmd
+linux_build: confile
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor  -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"  -o ./dist/server ./cmd
+windows_build: confile
+	@CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -mod=vendor -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"  -o ./dist/server.exe ./cmd
+run: build
+	@./dist/server up --conf ./dist/conf/config.yaml
+stop:
+	@kill -9 $(ps -ef | grep "./dist/server" |gawk '$0 !~/grep/ {print $2}' |tr -s '\n' ' ')
+init:
+	@git init
+	@chmod +x .githooks/go_pre_commit.sh
+	@cp .githooks/pre-commit .git/hooks && chmod +x ./.git/hooks/pre-commit && go mod tidy && go mod vendor
+	@cp .githooks/commit-msg .git/hooks && chmod +x ./.git/hooks/commit-msg
+coveralls:
+	@#go install github.com/mattn/goveralls@latest
+	@#go install golang.org/x/tools/cmd/cover@latest
+	#https://coveralls.io/
+	@go test ./... -v -covermode=count -coverprofile=coverage.out
+	@go tool cover -html=coverage.out -o coverage.html
+	@#goveralls -coverprofile=coverage.out -service=travis-ci -repotoken 3azIdp3c09dMBBbsrbs3l6qK1mGuEUowo
+codebeat:
+	@#https://codebeat.co/
+goreportcard:
+	@#https://goreportcard.com/report/github.com/fghosth/utils
+gitlog:
+	@#brew tap git-chglog/git-chglog    #https://github.com/git-chglog/git-chglog
+	@#brew install git-chglog
+	@git-chglog -o ./docs/CHANGELOG.md
+install: build
+	@mv ./dist/server $(GOPATH)/dist/
+
+clean:
+	@rm -rf ./dist
+confile:
+	@mkdir -p ./dist/conf
+	@cp ./conf/config.yaml ./dist/conf
+mysql:
+	@peep mcreate --mp {{{path}}}/infra/mysql/model --mpn "{{{module}}}/infra/mysql/model"  --uri "devops:zaq1xsw2CDE#@tcp(rm-uf673lf2loh08vk0s90130.mysql.rds.aliyuncs.com:3306)/valhalla?charset=utf8mb4&parseTime=true" --xp {{{path}}}/conf/xml
+LileGrpc:
+	@lile new --name {{{module}}}/ui/grpc/valhalla
+htmlStatic:
+	@statik -src={{{path}}}/doc
+Debug:
+	@go tool pprof -inuse_space http://127.0.0.1:6060/debug/pprof/heap #输入 inuse_space切换到常驻内存，alloc_space切换到分配的临时内存
+	@go tool pprof http://127.0.0.1:6060/debug/pprof/profile?seconds=30
+goconvey:
+	@goconvey
+mockgen:
+	@mockgen -destination=mocks/go -package=mocks -source=filex/file.go

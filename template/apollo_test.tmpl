@@ -1,0 +1,125 @@
+/**
+ * @Author: derek
+ * @Description:
+ * @File: apollo_test.go
+ * @Version: 1.0.0
+ * @Date: 2021/12/13 19:04
+ */
+
+package apollo
+
+import (
+	"github.com/k0kubun/pp"
+	"{{{module}}}/infra/apolloOpenApi"
+	"log"
+	"testing"
+	"time"
+)
+
+var (
+	apolloClientAddr = "apolloconfig-prod.fghosth.cn"
+	comment          = "openapi "
+	clusterName      = "default"
+	appID            = "fghosth-abc-20211212"
+)
+
+func TestApolloConfig_GetConfigByID(t *testing.T) {
+	apollo := NewApolloConfig(Apollo_dev_address, fghosth_abc_token, user, true)
+	res, err := apollo.GetConfigByNS("fghosth-abc-20211212", "report-v1-0-0")
+	if err != nil {
+		log.Println(err)
+	}
+	pp.Println(res)
+	time.Sleep(1 * time.Second)
+}
+
+func TestDerek(t *testing.T) {
+	c := apolloOpenApi.NewClient(portalAddress, fghosth_abc_token, apolloOpenApi.WithDebug(true))
+	res, err := c.CreateNamespace(apolloOpenApi.CreateNamespaceRequest{
+		Name:                  "abc",
+		AppID:                 "grpctest",
+		Format:                apolloOpenApi.FormatProperties,
+		IsPublic:              false,
+		DataChangeCreatedBy:   "apollo",
+		Comment:               "",
+		AppendNamespacePrefix: false,
+	})
+	if err != nil {
+		log.Println(err)
+	}
+	pp.Println(res)
+
+}
+
+func TestApolloConfig_CreateNamespace(t *testing.T) {
+	tk := "8edd9ed05d85706efa6c7b0ecd710fa7cb574045"
+	appid := "devops-app-20211228"
+	apollo := NewApolloConfig(portalAddress, tk, user, true)
+	namespace := "bom"
+	err := apollo.CreateNamespace(namespace, appid, comment)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestApolloConfig_AddConfig(t *testing.T) {
+	tk := "8edd9ed05d85706efa6c7b0ecd710fa7cb574045"
+	appid := "devops-app-20211228"
+	apollo := NewApolloConfig(portalAddress, tk, user, true)
+	env := ENV_QA
+	namespaceName := "bom"
+	key := "conf.yaml"
+	val := "asdf"
+	commnet := "openapi add"
+	err := apollo.AddConfig(env, appid, clusterName, namespaceName, key, val, commnet)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestApolloConfig_EditConfig(t *testing.T) {
+	apollo := NewApolloConfig(portalAddress, fghosth_abc_token, user, true)
+	env := ENV_PRD
+	namespaceName := "bom"
+	key := "conf.yaml"
+	val := "asdf11111"
+	commnet := "openapi add"
+	err := apollo.EditConfig(env, appID, clusterName, namespaceName, key, val, commnet)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestApolloConfig_DelelteConfig(t *testing.T) {
+	apollo := NewApolloConfig(portalAddress, fghosth_abc_token, user, true)
+	env := ENV_PRD
+	namespaceName := "bom"
+	key := "conf.yaml"
+	err := apollo.DelelteConfig(env, appID, clusterName, namespaceName, key)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestApolloConfig_PublishConfig(t *testing.T) {
+	apollo := NewApolloConfig(portalAddress, fghosth_abc_token, user, true)
+	env := ENV_PRD
+	namespaceName := "bom"
+	err := apollo.PublishConfig(env, appID, clusterName, namespaceName)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestApolloConfig_WatchConfig(t *testing.T) {
+	apollo := NewApolloConfig(apolloClientAddr, fghosth_abc_token, user, true)
+	namespaceName := "application"
+	//var f = func(ns string, oldVal, newVal agollo.Configurations, err error) error {
+	//	pp.Println(ns, oldVal, newVal, err)
+	//	return nil
+	//}
+	err := apollo.WatchConfig(appID, namespaceName, writeFileByConfig)
+	if err != nil {
+		log.Println(err)
+	}
+}

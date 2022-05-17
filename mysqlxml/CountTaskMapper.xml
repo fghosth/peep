@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+<mapper>
+    <!--logic_enable 逻辑删除字段-->
+    <!--logic_deleted 逻辑删除已删除字段-->
+    <!--logic_undelete 逻辑删除 未删除字段-->
+    <!--version_enable 乐观锁版本字段,支持int,int8,int16,int32,int64-->
+    <resultMap id="BaseResultMap" tables="count_task">
+    <id column="id" property="id"/>
+	<result column="request_id" property="request_id" langType="int64"   />
+	<result column="stime" property="stime" langType="Time"   />
+	<result column="etime" property="etime" langType="Time"   />
+	<result column="status" property="status" langType="int64"   />
+	<result column="reason" property="reason" langType="string"   />
+	<result column="cid" property="cid" langType="int64"   />
+	<result column="is_deleted" property="is_deleted" langType="int64"   />
+	<result column="create_time" property="create_time" langType="Time"   />
+	<result column="modify_time" property="modify_time" langType="Time"   />
+	<result column="request_data" property="request_data" langType="string"   />
+	<result column="category" property="category" langType="int64"   />
+	<result column="count_type" property="count_type" langType="string"   />
+	<result column="days" property="days" langType="int64"   />
+    </resultMap>
+
+<!-- =============================！！！！以上内容不要修改！！！！！================================================= -->
+<!--模板标签: columns wheres sets 支持逗号,分隔表达式，*?* 为判空表达式-->
+<!--插入模板:默认id="insertTemplate,test="field != null",where自动设置逻辑删除字段,支持批量插入" -->
+<insertTemplate id="Insert" />
+<!--查询模板:默认id="selectTemplate,where自动设置逻辑删除字段-->
+<selectTemplate id="FindByID" wheres="id?id = #{id}" />
+<!--更新模板:默认id="updateTemplate,set自动设置乐观锁版本号-->
+<updateTemplate id="UpdataByID"  wheres="id?id = #{id}" />
+<!--删除模板:默认id="deleteTemplate,where自动设置逻辑删除字段-->
+<deleteTemplate id="DeleteByID" wheres="id?id= #{id}" />
+<!--批量插入: 因为上面已经有id="insertTemplate" 需要指定id -->
+<insertTemplate id="InsertBatch"/>
+<!--统计模板:-->
+<!--	<selectTemplate id="selectCountTemplate" columns="count(*)" wheres="reason?reason = #{reason}"/>-->
+</mapper>
+

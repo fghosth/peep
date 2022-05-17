@@ -1,0 +1,29 @@
+FROM golang:1.17.4-alpine3.15 as builder
+ARG version=beta
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN apk add make
+RUN mkdir /go/src/app
+ADD . /go/src/app
+RUN cd /go/src/app \
+    && make Version=${version} linux_build
+
+
+FROM alpine:latest
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN apk add --no-cache ca-certificates  bash
+RUN mkdir -p /app/logs
+RUN mkdir -p /app/profile
+COPY --from=builder /go/src/app/dist/server  /app/
+
+COPY entrypoint.sh /bin
+COPY conf/xml /app/xml
+RUN chmod +x /bin/entrypoint.sh
+RUN chmod +x /app/server
+WORKDIR /app
+EXPOSE 8000
+CMD ["entrypoint.sh","-"]
+
+
+
+# build command
+# docker build --build-arg version=v1.0.2 -t peep .

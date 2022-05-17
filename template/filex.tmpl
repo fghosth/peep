@@ -1,0 +1,106 @@
+/**
+ * @Author: derek
+ * @Description:
+ * @File: file.go
+ * @Version: 1.0.0
+ * @Date: 2021/12/8 14:41
+ */
+
+package filex
+
+import (
+	"io"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+	"strings"
+)
+
+//检查文件是否存在
+func CheckFileIsExist(filename string) bool {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+//创建目录
+func MkDir(dir string) (err error) {
+	err = os.MkdirAll(dir, 0755)
+	return
+}
+
+//写入文件，覆盖
+func WriteFileTRUNC(data []byte, file string) (err error) {
+	var f *os.File
+	if CheckFileIsExist(file) { //如果文件存在
+		f, err = os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666) //打开文件
+		//fmt.Println("文件存在")
+	} else {
+		f, err = os.Create(file) //创建文件
+		//fmt.Println("文件不存在")
+	}
+	defer f.Close()
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(data)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+//写入文件，追加
+func WriteFileAPPEND(data []byte, file string) (err error) {
+	var f *os.File
+	if CheckFileIsExist(file) { //如果文件存在
+		f, err = os.OpenFile(file, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666) //打开文件
+		//fmt.Println("文件存在")
+	} else {
+		f, err = os.Create(file) //创建文件
+		//fmt.Println("文件不存在")
+	}
+	defer f.Close()
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(data)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+//遍历目录获取所有文件名 去除扩展名 不递归
+func GetFileList(p string) (fileList []string) {
+	fs, err := ioutil.ReadDir(p)
+	if err != nil {
+		log.Println(err)
+	}
+	for _, file := range fs {
+		if !file.IsDir() {
+			fileSuffix := path.Ext(file.Name())
+			filenameOnly := strings.TrimSuffix(file.Name(), fileSuffix)
+			fileList = append(fileList, filenameOnly)
+		}
+	}
+	return
+}
+
+//复制文件
+func CopyFile(source, target string) (err error) {
+	sf, err := os.Open(source)
+	defer sf.Close()
+	if err != nil {
+		return
+	}
+	tf, err := os.Create(target)
+	defer tf.Close()
+	if err != nil {
+		return
+	}
+	_, err = io.Copy(tf, sf)
+	return
+}
