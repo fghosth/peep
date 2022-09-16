@@ -4,7 +4,7 @@ default:
 build: tempstatik
 	@go build -mod=vendor -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'" -o ./dist/peep ./cmd
 	@tar czvf peep.tar.gz -C ./dist .
-	@shasum -a 256 peep.tar.gz && cp ./dist/peep /usr/local/bin
+	@shasum -a 256 peep.tar.gz && sudo cp ./dist/peep /usr/local/bin
 linux_build: confile
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor  -tags netgo -ldflags "-X main.Version=$(Version) -X 'main.BuildTime=`date`' -X 'main.GoVersion=`go version`'"  -o ./dist/peep ./cmd
 windows_build: confile

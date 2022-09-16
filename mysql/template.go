@@ -171,6 +171,7 @@ import (
 	"io/ioutil"
 	"sync"
 	"time"
+	"log"
 )
 
 var (
@@ -241,8 +242,8 @@ func NewDBBase(mysqlUri string, opt ...func(option *Option))(*DBBase,error) {
 		//自定义日志实现
 		if dbBase.opt.LogFun != nil {
 			dbBase.engine.SetLog(&GoMybatis.LogStandard{
-				PrintlnFunc: func(messages []byte) {
-					dbBase.opt.LogFun(messages)
+				PrintlnFunc: func(messages ...string) {
+					log.Println(messages)
 				},
 			})
 		}
