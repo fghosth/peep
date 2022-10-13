@@ -97,7 +97,7 @@ XML_TMP=` + "`" + `
 <!--查询模板:默认id="selectTemplate,where自动设置逻辑删除字段-->
 <selectTemplate id="FindByID" wheres="id?id = #{id}" />
 <!--更新模板:默认id="updateTemplate,set自动设置乐观锁版本号-->
-<updateTemplate id="UpdataByID"  wheres="id?id = #{id}" />
+<updateTemplate id="UpdateByID"  wheres="id?id = #{id}" />
 <!--删除模板:默认id="deleteTemplate,where自动设置逻辑删除字段-->
 <deleteTemplate id="DeleteByID" wheres="id?id= #{id}" />
 <!--批量插入: 因为上面已经有id="insertTemplate" 需要指定id -->
@@ -112,6 +112,13 @@ XML_TMP=` + "`" + `
 	</if>
 	order by ${orderField} ${order}
 	<if test="page != 0 and size != 0">limit #{offset}, #{size}</if>
+</select>
+<select id="Count">
+    select count(*) from feature
+    where
+    <if test="where != null">
+		${where}
+	</if>
 </select>
 </mapper>
 ` + "`)"
@@ -133,9 +140,10 @@ type {{{structName}}} struct {
 	FindByID      func(id int) ([]base.{{{TableStruct}}}, error) ` + "`" + `args:"id"` + "`" + `
 	Insert      func(arg base.{{{TableStruct}}}) (int64, error) ` + "`" + `args:"arg"` + "`" + `
 	InsertBatch func(args []base.{{{TableStruct}}}) (int64, error) ` + "`" + `args:"args"` + "`" + `
-	UpdataByID      func(arg base.{{{TableStruct}}}) (int64, error)    ` + "`" + `args:"id"` + "`" + `
+	UpdateByID      func(arg base.{{{TableStruct}}}) (int64, error)    ` + "`" + `args:"id"` + "`" + `
 	DeleteByID      func(id int) (int64, error)     ` + "`" + `args:"id"` + "`" + `
     List func(offset, size int64,orderField,order,where string)([]base.{{{TableStruct}}}, error) ` + "`" + `args:"offset,size,orderField,order,where"` + "`" + `
+	Count          func(where string) (int, error)        ` + "`" + `args:"where"` + "`" + `
 }
 var (
 	{{{sName}}}Once sync.Once
