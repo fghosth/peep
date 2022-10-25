@@ -1,4 +1,4 @@
-Version := beta
+Version := v1.0.0
 default:
 	@echo 'Usage of make: [ build | linux_build | windows_build | clean ]'
 build: tempstatik

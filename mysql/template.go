@@ -114,7 +114,7 @@ XML_TMP=` + "`" + `
 	<if test="page != 0 and size != 0">limit #{offset}, #{size}</if>
 </select>
 <select id="Count">
-    select count(*) from feature
+    select count(*) from {{{tablestr}}}
     where
     <if test="where != null">
 		${where}
