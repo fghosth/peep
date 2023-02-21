@@ -434,7 +434,7 @@ func (cfg Config) InitConfigApollo() {
 `
 	GOMOD_TMP = `module {{{module}}} 
 
-go 1.17
+go 1.19
 
 `
 	GITIGNORE_TMP = `*.idea
